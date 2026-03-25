@@ -9,8 +9,11 @@ import (
 )
 
 const (
-	predictorTag = "completion-predictor"
-	enabledTag   = "completion-enabled"
+	predictorTag           = "completion-predictor"
+	enabledTag             = "completion-enabled"
+	enabledShortTag        = "completion-short-enabled"
+	enabledCommandAliasTag = "completion-command-alias-enabled"
+	enabledFlagAliasTag    = "completion-flag-alias-enabled"
 )
 
 type options struct {
@@ -139,7 +142,9 @@ func nodeCommand(node *kong.Node, opts *options, vars kong.Vars, flags flags) (*
 		if childCmd != nil {
 			cmd.Sub[child.Name] = *childCmd
 			for _, alias := range child.Aliases {
-				cmd.Sub[alias] = *childCmd
+				if isCompletionCommandAliasEnabled(child.Tag) {
+					cmd.Sub[alias] = *childCmd
+				}
 			}
 		}
 	}
@@ -183,6 +188,39 @@ func isCompletionEnabled(tag *kong.Tag) bool {
 	return !tag.Hidden
 }
 
+func isCompletionShortEnabled(tag *kong.Tag) bool {
+	v := tag.Get(enabledShortTag)
+	if v == "false" {
+		return false
+	}
+	if v == "true" {
+		return true
+	}
+	return !tag.Hidden
+}
+
+func isCompletionCommandAliasEnabled(tag *kong.Tag) bool {
+	v := tag.Get(enabledCommandAliasTag)
+	if v == "false" {
+		return false
+	}
+	if v == "true" {
+		return true
+	}
+	return !tag.Hidden
+}
+
+func isCompletionFlagAliasEnabled(tag *kong.Tag) bool {
+	v := tag.Get(enabledFlagAliasTag)
+	if v == "false" {
+		return false
+	}
+	if v == "true" {
+		return true
+	}
+	return !tag.Hidden
+}
+
 func flagNamesWithHyphens(flags ...*kong.Flag) []string {
 	names := make([]string, 0, len(flags)*2)
 	if flags == nil {
@@ -190,11 +228,13 @@ func flagNamesWithHyphens(flags ...*kong.Flag) []string {
 	}
 	for _, flag := range flags {
 		names = append(names, "--"+flag.Name)
-		if flag.Short != 0 {
+		if flag.Short != 0 && isCompletionShortEnabled(flag.Tag) {
 			names = append(names, "-"+string(flag.Short))
 		}
 		for _, alias := range flag.Aliases {
-			names = append(names, "--"+alias)
+			if isCompletionFlagAliasEnabled(flag.Tag) {
+				names = append(names, "--"+alias)
+			}
 		}
 	}
 	return names
