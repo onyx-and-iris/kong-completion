@@ -43,6 +43,8 @@ func TestComplete(t *testing.T) {
 			Duck        struct{} `kong:"cmd,aliases=bird"`
 			AliasFlag   string   `kong:"aliases=aliasflag,completion-flag-alias-enabled=false"`
 			AliasFlagOn string   `kong:"aliases=aliasflagon,completion-flag-alias-enabled=true"`
+			ShortFlag   string   `kong:"short=s,completion-short-enabled=false"`
+			ShortFlagOn string   `kong:"short=o,completion-short-enabled=true"`
 		} `kong:"cmd"`
 		Bar struct {
 			Tiger    string `kong:"arg,completion-predictor=things"`
@@ -81,12 +83,12 @@ func TestComplete(t *testing.T) {
 		},
 		{
 			parser: kong.Must(&cli),
-			want:   []string{"--bar", "--baz", "--tata", "--titi", "--xuxu", "--xoxo", "--xixi", "--quz", "--lion", "--help", "-h", "--global", "--alias-flag", "--alias-flag-on", "--aliasflagon"},
+			want:   []string{"--bar", "--baz", "--tata", "--titi", "--xuxu", "--xoxo", "--xixi", "--quz", "--lion", "--help", "-h", "--global", "--alias-flag", "--alias-flag-on", "--aliasflagon", "--short-flag", "--short-flag-on", "-o"},
 			line:   "myApp foo -",
 		},
 		{
 			parser: kong.Must(&cli),
-			want:   []string{"--bar", "--baz", "--tata", "--titi", "--xuxu", "--xoxo", "--xixi", "--quz", "--lion", "--help", "--global", "--alias-flag", "--alias-flag-on", "--aliasflagon"},
+			want:   []string{"--bar", "--baz", "--tata", "--titi", "--xuxu", "--xoxo", "--xixi", "--quz", "--lion", "--help", "--global", "--alias-flag", "--alias-flag-on", "--aliasflagon", "--short-flag", "--short-flag-on"},
 			line:   "myApp foo --",
 		},
 		{
@@ -116,7 +118,7 @@ func TestComplete(t *testing.T) {
 		},
 		{
 			parser: kong.Must(&cli),
-			want:   []string{"--bar", "--baz", "--tata", "--titi", "--xuxu", "--xoxo", "--xixi", "--quz", "--lion", "--help", "-h", "--global", "--alias-flag", "--alias-flag-on", "--aliasflagon"},
+			want:   []string{"--bar", "--baz", "--tata", "--titi", "--xuxu", "--xoxo", "--xixi", "--quz", "--lion", "--help", "-h", "--global", "--alias-flag", "--alias-flag-on", "--aliasflagon", "--short-flag", "--short-flag-on", "-o"},
 			line:   "myApp foo --baz -",
 		},
 		{
