@@ -28,6 +28,21 @@ For flags and commands of your kong app, you can specify the following parameter
   - Possible values: `true`, `false`
   - Default value: derived from kong’s `hidden` flag – i.e., if the flag is hidden, it by default isn’t available for completion.
   - Usage example: `completion-enabled:"true"`
+- `completion-enabled-command-alias` (optional)
+  - Whether the command alias(es) should be included in the completions list.
+  - Possible values: `true`, `false`
+  - Default value: `true`
+  - Usage example: `completion-enabled-command-alias:"true"`
+- `completion-enabled-flag-alias` (optional)
+  - Whether the flag alias(es) should be included in the completions list.
+  - Possible values: `true`, `false`
+  - Default value: `true`
+  - Usage example: `completion-enabled-flag-alias:"true"`
+- `completion-enabled-flag-short` (optional)
+  - Whether the short flag should be included in the completions list.
+  - Possible values: `true`, `false`
+  - Default value: `true`
+  - Usage example: `completion-enabled-flag-short:"true"`
 - `completion-predictor` (optional)
   - Which completion predictor to use for completing this argument.
   - Possible values: any predictor name that is registered via the `WithPredictor` method.
