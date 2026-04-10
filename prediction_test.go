@@ -41,10 +41,10 @@ func TestComplete(t *testing.T) {
 			Rabbit      struct{} `kong:"cmd"`
 			Eagle       struct{} `kong:"cmd,completion-enabled=false"`
 			Duck        struct{} `kong:"cmd,aliases=bird"`
-			AliasFlag   string   `kong:"aliases=aliasflag,completion-flag-alias-enabled=false"`
-			AliasFlagOn string   `kong:"aliases=aliasflagon,completion-flag-alias-enabled=true"`
-			ShortFlag   string   `kong:"short=s,completion-short-enabled=false"`
-			ShortFlagOn string   `kong:"short=o,completion-short-enabled=true"`
+			AliasFlag   string   `kong:"aliases=aliasflag,completion-enabled-flag-alias=false"`
+			AliasFlagOn string   `kong:"aliases=aliasflagon,completion-enabled-flag-alias=true"`
+			ShortFlag   string   `kong:"short=s,completion-enabled-flag-short=false"`
+			ShortFlagOn string   `kong:"short=o,completion-enabled-flag-short=true"`
 		} `kong:"cmd"`
 		Bar struct {
 			Tiger    string `kong:"arg,completion-predictor=things"`
@@ -55,8 +55,8 @@ func TestComplete(t *testing.T) {
 			BooFlag  bool   `kong:"name=boofl,short=b"`
 		} `kong:"cmd,set=a=other"`
 		Baz            struct{} `kong:"cmd,hidden"`
-		CmdWithAlias   struct{} `kong:"cmd,aliases=aliascmd,completion-command-alias-enabled=false"`
-		CmdWithAliasOn struct{} `kong:"cmd,aliases=aliascmdon,completion-command-alias-enabled=true"`
+		CmdWithAlias   struct{} `kong:"cmd,aliases=aliascmd,completion-enabled-command-alias=false"`
+		CmdWithAliasOn struct{} `kong:"cmd,aliases=aliascmdon,completion-enabled-command-alias=true"`
 		Global         string   `kong:""`
 	}
 
