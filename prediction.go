@@ -9,8 +9,11 @@ import (
 )
 
 const (
-	predictorTag = "completion-predictor"
-	enabledTag   = "completion-enabled"
+	predictorTag           = "completion-predictor"
+	enabledTag             = "completion-enabled"
+	commandAliasEnabledTag = "completion-enabled-command-alias"
+	flagAliasEnabledTag    = "completion-enabled-flag-alias"
+	flagShortEnabledTag    = "completion-enabled-flag-short"
 )
 
 type options struct {
@@ -129,7 +132,7 @@ func nodeCommand(node *kong.Node, opts *options, vars kong.Vars, flags flags) (*
 	flags.argFlags = append(slices.Clone(flags.argFlags), argFlags...)
 
 	for _, child := range node.Children {
-		if child == nil || !isCompletionEnabled(child.Tag) {
+		if child == nil || !shallComplete(enabledTag, child.Tag) {
 			continue
 		}
 		childCmd, err := nodeCommand(child, opts, vars, flags)
@@ -139,13 +142,15 @@ func nodeCommand(node *kong.Node, opts *options, vars kong.Vars, flags flags) (*
 		if childCmd != nil {
 			cmd.Sub[child.Name] = *childCmd
 			for _, alias := range child.Aliases {
-				cmd.Sub[alias] = *childCmd
+				if shallComplete(commandAliasEnabledTag, child.Tag) {
+					cmd.Sub[alias] = *childCmd
+				}
 			}
 		}
 	}
 
 	for _, flag := range node.Flags {
-		if flag == nil || !isCompletionEnabled(flag.Tag) {
+		if flag == nil || !shallComplete(enabledTag, flag.Tag) {
 			continue
 		}
 		predictor, err := flagPredictor(flag, opts.predictors, vars)
@@ -172,8 +177,8 @@ func nodeCommand(node *kong.Node, opts *options, vars kong.Vars, flags flags) (*
 	return &cmd, nil
 }
 
-func isCompletionEnabled(tag *kong.Tag) bool {
-	v := tag.Get(enabledTag)
+func shallComplete(kind string, tag *kong.Tag) bool {
+	v := tag.Get(kind)
 	if v == "false" {
 		return false
 	}
@@ -190,11 +195,13 @@ func flagNamesWithHyphens(flags ...*kong.Flag) []string {
 	}
 	for _, flag := range flags {
 		names = append(names, "--"+flag.Name)
-		if flag.Short != 0 {
+		if flag.Short != 0 && shallComplete(flagShortEnabledTag, flag.Tag) {
 			names = append(names, "-"+string(flag.Short))
 		}
 		for _, alias := range flag.Aliases {
-			names = append(names, "--"+alias)
+			if shallComplete(flagAliasEnabledTag, flag.Tag) {
+				names = append(names, "--"+alias)
+			}
 		}
 	}
 	return names

@@ -30,17 +30,21 @@ func TestComplete(t *testing.T) {
 
 	var cli struct {
 		Foo struct {
-			Embedded embed  `kong:"embed"`
-			Bar      string `kong:"completion-predictor=things"`
-			Baz      bool
-			Tata     string   `kong:"aliases=titi"`        // one alias
-			Xuxu     string   `kong:"aliases='xoxo,xixi'"` // multiple aliases
-			Qux      bool     `kong:"hidden"`              // regular hidden
-			Quy      bool     `kong:"completion-enabled=false"`
-			Quz      bool     `kong:"hidden,completion-enabled=true"`
-			Rabbit   struct{} `kong:"cmd"`
-			Eagle    struct{} `kong:"cmd,completion-enabled=false"`
-			Duck     struct{} `kong:"cmd,aliases=bird"`
+			Embedded    embed  `kong:"embed"`
+			Bar         string `kong:"completion-predictor=things"`
+			Baz         bool
+			Tata        string   `kong:"aliases=titi"`        // one alias
+			Xuxu        string   `kong:"aliases='xoxo,xixi'"` // multiple aliases
+			Qux         bool     `kong:"hidden"`              // regular hidden
+			Quy         bool     `kong:"completion-enabled=false"`
+			Quz         bool     `kong:"hidden,completion-enabled=true"`
+			Rabbit      struct{} `kong:"cmd"`
+			Eagle       struct{} `kong:"cmd,completion-enabled=false"`
+			Duck        struct{} `kong:"cmd,aliases=bird"`
+			AliasFlag   string   `kong:"aliases=aliasflag,completion-enabled-flag-alias=false"`
+			AliasFlagOn string   `kong:"aliases=aliasflagon,completion-enabled-flag-alias=true"`
+			ShortFlag   string   `kong:"short=s,completion-enabled-flag-short=false"`
+			ShortFlagOn string   `kong:"short=o,completion-enabled-flag-short=true"`
 		} `kong:"cmd"`
 		Bar struct {
 			Tiger    string `kong:"arg,completion-predictor=things"`
@@ -50,15 +54,16 @@ func TestComplete(t *testing.T) {
 			Number   int    `kong:"required,short=n,enum='1,2,3'"`
 			BooFlag  bool   `kong:"name=boofl,short=b"`
 		} `kong:"cmd,set=a=other"`
-		Baz struct{} `kong:"cmd,hidden"`
-
-		Global string `kong:""`
+		Baz            struct{} `kong:"cmd,hidden"`
+		CmdWithAlias   struct{} `kong:"cmd,aliases=aliascmd,completion-enabled-command-alias=false"`
+		CmdWithAliasOn struct{} `kong:"cmd,aliases=aliascmdon,completion-enabled-command-alias=true"`
+		Global         string   `kong:""`
 	}
 
 	for _, td := range []completeTest{
 		{
 			parser: kong.Must(&cli),
-			want:   []string{"foo", "bar"},
+			want:   []string{"foo", "bar", "cmd-with-alias", "cmd-with-alias-on", "aliascmdon"},
 			line:   "myApp ",
 		},
 		{
@@ -78,13 +83,28 @@ func TestComplete(t *testing.T) {
 		},
 		{
 			parser: kong.Must(&cli),
-			want:   []string{"--bar", "--baz", "--tata", "--titi", "--xuxu", "--xoxo", "--xixi", "--quz", "--lion", "--help", "-h", "--global"},
+			want:   []string{"--bar", "--baz", "--tata", "--titi", "--xuxu", "--xoxo", "--xixi", "--quz", "--lion", "--help", "-h", "--global", "--alias-flag", "--alias-flag-on", "--aliasflagon", "--short-flag", "--short-flag-on", "-o"},
 			line:   "myApp foo -",
 		},
 		{
 			parser: kong.Must(&cli),
-			want:   []string{"--bar", "--baz", "--tata", "--titi", "--xuxu", "--xoxo", "--xixi", "--quz", "--lion", "--help", "--global"},
+			want:   []string{"--bar", "--baz", "--tata", "--titi", "--xuxu", "--xoxo", "--xixi", "--quz", "--lion", "--help", "--global", "--alias-flag", "--alias-flag-on", "--aliasflagon", "--short-flag", "--short-flag-on"},
 			line:   "myApp foo --",
+		},
+		{
+			parser: kong.Must(&cli),
+			want:   []string{"--alias-flag-on"},
+			line:   "myApp foo --alias-flag-on",
+		},
+		{
+			parser: kong.Must(&cli),
+			want:   []string{"--alias-flag", "--alias-flag-on"},
+			line:   "myApp foo --alias-flag",
+		},
+		{
+			parser: kong.Must(&cli),
+			want:   []string{"cmd-with-alias", "cmd-with-alias-on"},
+			line:   "myApp c",
 		},
 		{
 			parser: kong.Must(&cli),
@@ -98,7 +118,7 @@ func TestComplete(t *testing.T) {
 		},
 		{
 			parser: kong.Must(&cli),
-			want:   []string{"--bar", "--baz", "--tata", "--titi", "--xuxu", "--xoxo", "--xixi", "--quz", "--lion", "--help", "-h", "--global"},
+			want:   []string{"--bar", "--baz", "--tata", "--titi", "--xuxu", "--xoxo", "--xixi", "--quz", "--lion", "--help", "-h", "--global", "--alias-flag", "--alias-flag-on", "--aliasflagon", "--short-flag", "--short-flag-on", "-o"},
 			line:   "myApp foo --baz -",
 		},
 		{
@@ -153,7 +173,7 @@ func TestComplete(t *testing.T) {
 		},
 		{
 			parser: kong.Must(&cli),
-			want:   []string{"foo", "bar"},
+			want:   []string{"foo", "bar", "cmd-with-alias", "cmd-with-alias-on", "aliascmdon"},
 			line:   "myApp --global=test ",
 		},
 		{
